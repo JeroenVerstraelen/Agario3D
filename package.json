@@ -1,0 +1,23 @@
+{
+  "name": "agario3d",
+  "version": "1.0.0",
+  "main": "server.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "Jeroen Verstraelen",
+  "license": "ISC",
+  "dependencies": {
+    "babylonjs": "^4.1.0",
+    "babylonjs-gui": "^4.1.0",
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "description": ""
+}
