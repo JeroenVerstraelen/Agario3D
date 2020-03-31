@@ -60,7 +60,7 @@ class Player {
 
 	reset() {
 		this.position = new BABYLON.Vector3(0, 0, 0);
-		this.r = 0;
+		this.r = 8;
 	}
 }
 
@@ -124,7 +124,7 @@ function heartbeat() {
 		minimalPlayers[id] = players[id].getMinimalData();
 	}
 	var foodCreated = [];
-	while (foodBlobs.length < 100) {
+	while (foodBlobs.length < 5000) {
 		var x = (Math.random() * 1600) - 800;
 		var z = (Math.random() * 1600) - 800;
 		// TODO: Generate away from players

@@ -17,12 +17,12 @@ var player;
 var foodBlobs = [];
 var gameInitialized = false;
 
-function Food(id, x, z, r, scene, adt) {
+function Food(id, x, z, r, scene, adt, templateMesh) {
 	this.id = id;
 	this.x = x;
 	this.z = z;
 	this.r = r;
-	var sphere = new SphereModel(x, z, r, scene);
+	var sphere = new SphereModel(x, z, r, scene, templateMesh);
 	this.model = sphere;
 
 	// NameText
@@ -48,6 +48,7 @@ window.addEventListener('DOMContentLoaded', function () {
 	// load the 3D engine
 	var engine = new BABYLON.Engine(canvas, true);
 	var tiledGround;
+	var foodTemplateMesh;
 
 	// createScene function that creates and return the scene
 	var createScene = function () {
@@ -65,6 +66,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
 		player = new Player(socket.id, 0, 0, 8, scene, adt);
 		tiledGround = new TiledGround(scene);
+
+		foodTemplateMesh = new Food(-1, 0, 0, 0, scene, adt, null).model.model;
 
 		// Camera
 		var camera = new BABYLON.ArcRotateCamera("arcCamera1", 0, 1, 20, player.model.model, scene);
@@ -86,12 +89,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 		// Environment
-		/*
 		scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
 		scene.fogDensity = 0.006;
 		scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.85);
 		scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-		*/
 
 
 		// Game/Render loop
@@ -132,11 +133,11 @@ window.addEventListener('DOMContentLoaded', function () {
 			// NameText
 			textModel.text = "Loading in " + blobs.length + " objects. Please wait.";
 			adt.addControl(textModel);
-
+			// Spawn all food in at once.
 			setTimeout(() => {
 				for (const index in blobs) {
 					var blob = blobs[index];
-					var food = new Food(blob.id, blob.x, blob.z, blob.r, scene, adt);
+					var food = new Food(blob.id, blob.x, blob.z, blob.r, scene, adt, foodTemplateMesh);
 					foodBlobs.push(food);
 				}
 				adt.removeControl(textModel);
@@ -148,7 +149,7 @@ window.addEventListener('DOMContentLoaded', function () {
 		socket.on('foodCreated', function (foodCreated) {
 			for (const index in foodCreated) {
 				var foodBlob = foodCreated[index];
-				var food = new Food(foodBlob.id, foodBlob.x, foodBlob.z, foodBlob.r, scene, adt);
+				var food = new Food(foodBlob.id, foodBlob.x, foodBlob.z, foodBlob.r, scene, adt, foodTemplateMesh);
 				foodBlobs.push(food);
 			}
 		});

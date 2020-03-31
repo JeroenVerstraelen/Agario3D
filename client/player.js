@@ -25,7 +25,7 @@ export class Player {
 
 		// NameText
 		var textModel = new BABYLON.GUI.TextBlock();
-		textModel.text = "";
+		textModel.text = id;
 		textModel.paddingTop = "2px";
 		textModel.width = "500px";
 		textModel.height = "40px";
@@ -84,7 +84,6 @@ export class Player {
 	}
 
 	onTick(deltaTime) {
-		console.log(deltaTime);
 		if (this.targetDirection.x === 0 && this.targetDirection.z === 0) {
 			return;
 		}
