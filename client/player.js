@@ -39,7 +39,7 @@ export class Player {
 		this.textModel = textModel;
 
 
-		this.targetDirection = new BABYLON.Vector3(5, 0, 4);
+		this.targetDirection = new BABYLON.Vector3(0, 0, 0);
 	}
 
 	setId(id) {
@@ -59,15 +59,6 @@ export class Player {
 			r: this.model.getRadius()
 		};
 	}
-	/*
-	move(forward) {
-		var direction = forward.subtract(this.model.getPosition());
-		direction.normalize();
-		direction.y = 0;
-		direction.scaleInPlace(this.velocity)
-		this.model.moveInDirection(direction);
-		this.model.increaseRadius(0.05);
-	}*/
 
 	destroy() {
 		this.model.dispose();
@@ -75,23 +66,34 @@ export class Player {
 
 	update(minimalData) {
 		var target = new BABYLON.Vector3(minimalData.x, 0, minimalData.z)
-		//if (target.subtract(this.model.getPosition()).length() > 20) {
-		//	this.model.setPosition(target.x, target.z);
-		//}
-		var direction = target.subtract(this.model.getPosition());
-		direction.normalize();
-		direction.y = 0;
-		direction.scaleInPlace(this.velocity);
 
-		//if (this.targetDirection.subtract(direction).lengthSquared() > 0.8) {
-		//	console.log(this.targetDirection.subtract(direction).lengthSquared());
+		var direction = target.subtract(this.model.getPosition());
+		if (target.subtract(this.model.getPosition()).length() > 10) {
+			// Quickly catch back up to the server.
+			direction.y = 0;
+			direction.scaleInPlace(0.5);
+		} else {
+			direction.normalize();
+			direction.y = 0;
+			direction.scaleInPlace(this.velocity);
+		}
+
 		this.targetDirection = direction;
-		//}
 		this.model.setRadius(minimalData.r);
 		this.textModel.linkOffsetY = -(Math.sqrt(minimalData.r) * 20);
 	}
 
-	onTick() {
-		this.model.moveInDirection(this.targetDirection);
+	onTick(deltaTime) {
+		console.log(deltaTime);
+		if (this.targetDirection.x === 0 && this.targetDirection.z === 0) {
+			return;
+		}
+		//console.assert(this.targetDirection.length() === this.velocity, this.targetDirection.length());
+		var scaledDirection = this.targetDirection.scale(deltaTime);
+
+		//console.assert(scaledDirection.length() === this.velocity * deltaTime, scaledDirection.length());
+
+		//console.log('scaledDirection :', scaledDirection);
+		this.model.moveInDirection(scaledDirection);
 	}
 }

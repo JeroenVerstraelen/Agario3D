@@ -30,9 +30,9 @@ class Player {
 		this.velocity = 1;
 		this.position = new BABYLON.Vector3(x, 0, z);
 		this.r = r;
-		this.targetDirection = new BABYLON.Vector3(x, 0, z);
+		this.targetDirection = new BABYLON.Vector3(0, 0, 0);
 	}
-	
+
 	getMinimalData() {
 		return {
 			x: this.position.x,
@@ -42,7 +42,12 @@ class Player {
 	}
 
 	onTick() {
+		if (this.targetDirection.x === 0 && this.targetDirection.z === 0) {
+			return;
+		}
 		this.position.addInPlace(this.targetDirection);
+		this.position.x = Math.min(Math.max(this.position.x, -800), 800);
+		this.position.z = Math.min(Math.max(this.position.z, -800), 800);
 	}
 
 	setTarget(forward) {
@@ -60,18 +65,21 @@ class Player {
 }
 
 function listen() {
-  var host = server.address().address;
-  var port = server.address().port;
-  console.log('Example app listening at http://' + host + ':' + port);
+	var host = server.address().address;
+	var port = server.address().port;
+	console.log('Example app listening at http://' + host + ':' + port);
 }
 
 app.use(express.static('./'));
 
 var io = require('socket.io')(server);
 
-setInterval(heartbeat, 1000/60);
+setInterval(heartbeat, 1000 / 60);
 
 function heartbeat() {
+	for (const id in players) {
+		players[id].onTick();
+	}
 	minimalPlayers = {};
 	var foodEatenIds = [];
 	var foodEatenToRemoveIndices = [];
@@ -81,7 +89,7 @@ function heartbeat() {
 		var z1 = players[id].position.z;
 		var r1 = players[id].r;
 		// Food collissions
-		for (index = 0; index < foodBlobs.length; index++) { 
+		for (index = 0; index < foodBlobs.length; index++) {
 			var food = foodBlobs[index];
 			var dist = Math.sqrt(Math.pow(x1 - food.x, 2) + Math.pow(z1 - food.z, 2));
 			if (dist < (r1 + food.r) * 0.5) {
@@ -116,34 +124,31 @@ function heartbeat() {
 		minimalPlayers[id] = players[id].getMinimalData();
 	}
 	var foodCreated = [];
-	while (foodBlobs.length < 1000) {
-		var x = (Math.random()*1600)-800;
-		var z = (Math.random()*1600)-800;
+	while (foodBlobs.length < 100) {
+		var x = (Math.random() * 1600) - 800;
+		var z = (Math.random() * 1600) - 800;
 		// TODO: Generate away from players
-		var r = Math.random()*10 + 2;
-		var foodBlob = new Food(currentFoodId, x,z,r);
+		var r = Math.random() * 10 + 2;
+		var foodBlob = new Food(currentFoodId, x, z, r);
 		currentFoodId++;
 		foodBlobs.push(foodBlob);
 		foodCreated.push(foodBlob);
-		
+
 	}
 	io.emit('foodCreated', foodCreated);
 	io.emit('foodEaten', foodEatenIds);
 	io.emit('heartbeat', minimalPlayers);
-	for (const id in players) {
-		players[id].onTick();
-	}
 }
 
-io.sockets.on('connection', function(socket) {
+io.sockets.on('connection', function (socket) {
 	console.log('We have a new client: ' + socket.id);
 
-	socket.on('start', function(data) {
+	socket.on('start', function (data) {
 		console.log(socket.id + ' ' + data.x + ' ' + data.z + ' ' + data.r);
 		var player = new Player(socket.id, data.x, data.z, data.r);
 		players[socket.id] = player;
-		setTimeout(() => {  
-			socket.emit('init', foodBlobs); 
+		setTimeout(() => {
+			socket.emit('init', foodBlobs);
 		}, 500);
 		/*for (var chunk = 0; chunk < totalChunks; chunk++) {
 			console.log(foodBlobs.slice(chunk, (chunk+1)*chunkSize).length)
@@ -156,22 +161,21 @@ io.sockets.on('connection', function(socket) {
 				, (chunk+1)*5000);
 		}*/
 
-		
-		
-		
-    });
 
-    socket.on('update', function(forward) {		
+
+
+	});
+
+	socket.on('update', function (forward) {
 		var player = players[socket.id];
 		if (player !== undefined) {
 			var forwardVec = new BABYLON.Vector3(forward.x, forward.y, forward.z);
 			player.setTarget(forwardVec);
 		}
-    });
+	});
 
-    socket.on('disconnect', function() {
-      console.log('Client has disconnected: ' + socket.id);
-	  delete players[socket.id]
-    });
-  }
-);
+	socket.on('disconnect', function () {
+		console.log('Client has disconnected: ' + socket.id);
+		delete players[socket.id]
+	});
+});

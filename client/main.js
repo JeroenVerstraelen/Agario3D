@@ -15,6 +15,7 @@ socket = io.connect('http://localhost:3000');
 var players = {}
 var player;
 var foodBlobs = [];
+var gameInitialized = false;
 
 function Food(id, x, z, r, scene, adt) {
 	this.id = id;
@@ -46,6 +47,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
 	// load the 3D engine
 	var engine = new BABYLON.Engine(canvas, true);
+	var tiledGround;
 
 	// createScene function that creates and return the scene
 	var createScene = function () {
@@ -62,11 +64,12 @@ window.addEventListener('DOMContentLoaded', function () {
 		scene.createDefaultSkybox(texture, true, 5000);
 
 		player = new Player(socket.id, 0, 0, 8, scene, adt);
-		var tiledGround = new TiledGround(scene);
+		tiledGround = new TiledGround(scene);
 
 		// Camera
 		var camera = new BABYLON.ArcRotateCamera("arcCamera1", 0, 1, 20, player.model.model, scene);
 		camera.attachControl(canvas, true);
+		camera.maxZ = 600;
 		scene.collisionsEnabled = true;
 		camera.checkCollisions = true;
 		tiledGround.model.checkCollisions = true;
@@ -83,33 +86,41 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
 		// Environment
+		/*
 		scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
 		scene.fogDensity = 0.006;
 		scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.85);
 		scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+		*/
 
 
 		// Game/Render loop
+		var timestep = 1000 / 60;
+		var delta = 0;
+		var lastFrameTimeMs = 0;
 		var forward = new BABYLON.Vector3(0, 0, 0);
-		scene.onBeforeRenderObservable.add(() => {
-			// Actual scene
-			camera.radius = Math.sqrt(player.model.getRadius()) * 50;
-		})
-
-		function myFunction() {
-			// Calculate forward direction
+		var rollingAverage = new BABYLON.RollingAverage(60);
+		scene.registerBeforeRender(() => {
+			delta += engine.getDeltaTime();
+			rollingAverage.add(scene.getAnimationRatio());
+			if (!gameInitialized) {
+				return;
+			}
 			var groundPoint = tiledGround.getMousePositionOnGround(scene);
 			if (groundPoint !== null) {
 				forward = groundPoint;
 			}
-			// Transmit forward
-			socket.emit('update', forward);
 			for (const id in players) {
-				players[id].onTick();
+				players[id].onTick(rollingAverage.average);
 			}
-			requestAnimationFrame(myFunction);
-		}
-		requestAnimationFrame(myFunction);
+			if (delta >= timestep) {
+				// Send updates to the server at a locked 60 hz.
+				socket.emit('update', forward);
+				delta = 0;
+			}
+
+			camera.radius = Math.sqrt(player.model.getRadius()) * 50;
+		})
 
 		// Networking
 		socket.on('connect', function () {
@@ -130,6 +141,9 @@ window.addEventListener('DOMContentLoaded', function () {
 				}
 				adt.removeControl(textModel);
 			}, 33);
+			setTimeout(() => {
+				gameInitialized = true;
+			}, 800);
 		});
 		socket.on('foodCreated', function (foodCreated) {
 			for (const index in foodCreated) {
