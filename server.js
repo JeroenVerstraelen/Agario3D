@@ -25,8 +25,9 @@ function Food(id, x, z, r) {
 }
 
 class Player {
-	constructor(id, x, z, r) {
+	constructor(id, x, z, r, username) {
 		this.id = id;
+		this.username = username;
 		this.velocity = 1;
 		this.position = new BABYLON.Vector3(x, 0, z);
 		this.r = r;
@@ -37,7 +38,8 @@ class Player {
 		return {
 			x: this.position.x,
 			z: this.position.z,
-			r: this.r
+			r: this.r,
+			username: this.username
 		};
 	}
 
@@ -144,8 +146,8 @@ io.sockets.on('connection', function (socket) {
 	console.log('We have a new client: ' + socket.id);
 
 	socket.on('start', function (data) {
-		console.log(socket.id + ' ' + data.x + ' ' + data.z + ' ' + data.r);
-		var player = new Player(socket.id, data.x, data.z, data.r);
+		console.log(data.username + ': ' + socket.id + ' ' + data.x + ' ' + data.z + ' ' + data.r);
+		var player = new Player(socket.id, data.x, data.z, data.r, data.username);
 		players[socket.id] = player;
 		setTimeout(() => {
 			socket.emit('init', foodBlobs);

@@ -18,14 +18,19 @@ function getCookie(cname) {
 }
 
 export class Player {
-	constructor(id, x, z, r, scene, adt) {
+	constructor(id, x, z, r, scene, adt, username) {
 		this.id = id;
+		if (username === undefined) {
+			this.username = getCookie("username");
+		} else {
+			this.username = username;
+		}
 		this.velocity = 1;
 		this.model = new SphereModel(x, z, r, scene);
 
 		// NameText
 		var textModel = new BABYLON.GUI.TextBlock();
-		textModel.text = id;
+		textModel.text = this.username;
 		textModel.paddingTop = "2px";
 		textModel.width = "500px";
 		textModel.height = "40px";
@@ -43,12 +48,6 @@ export class Player {
 	}
 
 	setId(id) {
-		var username = getCookie("username");
-		if (username !== "") {
-			this.textModel.text = username;
-		} else {
-			this.textModel.text = id;
-		}
 		this.id = id;
 	}
 

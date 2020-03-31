@@ -128,7 +128,10 @@ window.addEventListener('DOMContentLoaded', function () {
 			player.setId(socket.id);
 			players[socket.id] = player;
 		});
-		socket.emit('start', player.getMinimalData());
+		socket.emit('start', {
+			...player.getMinimalData(),
+			username: player.username
+		});
 		socket.on('init', function (blobs) {
 			// NameText
 			textModel.text = "Loading in " + blobs.length + " objects. Please wait.";
@@ -186,7 +189,7 @@ window.addEventListener('DOMContentLoaded', function () {
 					player.update(minimalPlayer);
 					continue;
 				}
-				players[id] = new Player(id, minimalPlayer.x, minimalPlayer.z, minimalPlayer.r, scene, adt);
+				players[id] = new Player(id, minimalPlayer.x, minimalPlayer.z, minimalPlayer.r, scene, adt, minimalPlayer.username);
 			}
 			// Remove disconnected players.
 			for (const id in players) {
