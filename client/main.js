@@ -133,10 +133,9 @@ window.addEventListener('DOMContentLoaded', function () {
 			username: player.username
 		});
 		socket.on('init', function (blobs) {
-			// NameText
 			textModel.text = "Loading in " + blobs.length + " objects. Please wait.";
 			adt.addControl(textModel);
-			// Spawn all food in at once.
+			// Spawn all food at once.
 			setTimeout(() => {
 				for (const index in blobs) {
 					var blob = blobs[index];
