@@ -4,15 +4,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
     <title>Agario3D</title>
-    <!--- Link to the last version of BabylonJS --->
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://preview.babylonjs.com/gui/babylon.gui.js"></script>
-    <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
-    <!--- ECS --->
-    <script src="https://ecsy.io/build/ecsy.module.js"></script>
-
-    <!--- Google --->
+    <!-- Google -->
     <meta name="google-signin-client_id"
         content="992072623164-s6en0rsrjralajiuhckiisp8jetid8cm.apps.googleusercontent.com">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
@@ -36,7 +29,7 @@
             var profile = googleUser.getBasicProfile();
             document.cookie = "username=" + profile.getName();
             //setCookie("username", profile.getName(), 100);
-            window.location.pathname = 'client/game.html'
+            window.location.pathname = 'dist/public/game.html'
         }
     </script>
 </body>

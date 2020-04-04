@@ -1,19 +1,25 @@
 {
   "name": "agario3d",
   "version": "1.0.0",
-  "main": "server.mjs",
+  "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon dist/server/server.js",
+    "build": "(tsc -b) && (copyfiles -u 1 src/**/*.html dist/)"
   },
   "author": "Jeroen Verstraelen",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.4",
+    "@types/node": "^13.9.8",
+    "@types/socket.io": "^2.1.4",
+    "@types/socket.io-client": "^1.4.32",
     "babylonjs": "^4.1.0",
     "babylonjs-gui": "^4.1.0",
-    "express": "^4.13.4",
-    "socket.io": "^1.4.5",
+    "copyfiles": "^2.2.0",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0",
     "typescript": "^3.8.3"
   },
   "keywords": [],
