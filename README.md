@@ -1,6 +1,6 @@
 # Agario3D
 A simple NodeJS + WebGL project to learn how to work with javascript, Nodejs, WebGl and Typescript.
-A 3D multiplayer version of the popular [Node.js](https://agar.io/) game.
+A 3D multiplayer version of the popular [Agar.io](https://agar.io/) game.
 
 # Build
 * Install [Node.js](https://nodejs.org/)
